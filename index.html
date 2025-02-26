@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автоматический снимок с камеры</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        video {
+            display: none;
+        }
+        canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Угарок!</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // Функция для захвата изображения с камеры и скачивания файла
+        async function captureAndDownloadPhoto() {
+            try {
+                // Запрашиваем доступ к камере
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+
+                // Когда видео загрузится, делаем снимок
+                video.onloadedmetadata = () => {
+                    const canvas = document.getElementById('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    // Устанавливаем размеры canvas
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+
+                    // Рисуем изображение с видео на canvas
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                    // Преобразуем изображение в формат Data URL
+                    const imageData = canvas.toDataURL('image/png');
+
+                    // Создаем ссылку для скачивания снимка
+                    const a = document.createElement('a');
+                    a.href = imageData; // Привязываем Data URL с изображением
+                    a.download = 'screenshot.png'; // Указываем имя файла для скачивания
+                    a.click(); // Автоматически скачиваем файл
+
+                    // Останавливаем поток камеры
+                    const streamTracks = stream.getTracks();
+                    streamTracks.forEach(track => track.stop());
+                };
+            } catch (error) {
+                alert('Не удалось получить доступ к камере. Пожалуйста, разрешите доступ.');
+            }
+        }
+
+        // Инициализируем пранк и делаем снимок сразу
+        window.onload = captureAndDownloadPhoto;
+    </script>
+</body>
+</html>
+
+
+
+
+
